@@ -1,0 +1,97 @@
+.navbar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #212529;
+  color: white;
+  padding: 10px 16px;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.navbar-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: white;
+  gap: 6px;
+}
+
+.brand-logo img {
+  width: 36px;
+  height: 36px;
+}
+
+.brand-text {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+
+.dashboard-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-form {
+  display: none;
+}
+
+.search-form.visible {
+  display: block;
+}
+
+.search-form input {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  width: 200px;
+}
+
+.search-icon {
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.btn {
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  background-color: #0d6efd;
+  color: white;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 🌐 Mobile Enhancements */
+@media (max-width: 768px) {
+  .navbar-wrapper {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .search-form input {
+    width: 150px;
+  }
+}

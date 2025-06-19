@@ -1,0 +1,157 @@
+.task-details-container {
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 30px 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  font-family: "Segoe UI", sans-serif;
+  color: #2e2e2e;
+  line-height: 1.6;
+}
+
+.task-details-container h2 {
+  font-size: 28px;
+  color: #222;
+  margin-bottom: 25px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.task-details-container p {
+  margin: 8px 0;
+  font-size: 16px;
+  word-wrap: break-word;
+}
+
+.task-details-container strong {
+  display: inline-block;
+  width: 150px;
+  font-weight: 600;
+}
+
+.file-upload input[type="file"] {
+  margin-top: 6px;
+}
+
+.file-upload .file-link {
+  text-decoration: none;
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.file-upload .file-link:hover {
+  text-decoration: underline;
+}
+
+.completion-date input {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  margin-top: 6px;
+}
+
+.comments-section {
+  margin-top: 30px;
+}
+
+.comments-section ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  margin-top: 10px;
+}
+
+.comments-section li {
+  background: #f9f9f9;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.comments-section textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  resize: vertical;
+  font-size: 14px;
+}
+
+.comments-section button {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.comments-section button:hover {
+  background-color: #43a047;
+}
+
+.back-button {
+  display: block;
+  margin: 40px auto 0;
+  padding: 10px 20px;
+  font-size: 15px;
+  background-color: #333;
+  color: #fff;
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #000;
+}
+
+.file-list {
+  margin: 10px 0;
+  padding-left: 20px;
+}
+
+.file-list li {
+  background-color: #f1f1f1;
+  margin: 4px 0;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+/* 📱 Responsive Enhancements */
+@media (max-width: 600px) {
+  .task-details-container {
+    padding: 20px;
+  }
+
+  .task-details-container strong {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+
+  .comments-section textarea {
+    font-size: 15px;
+  }
+
+  .file-upload input[type="file"] {
+    width: 100%;
+  }
+
+  .file-list {
+    padding-left: 10px;
+  }
+
+  .completion-date input {
+    width: 100%;
+  }
+}

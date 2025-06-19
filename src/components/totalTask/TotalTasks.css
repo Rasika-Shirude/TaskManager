@@ -1,0 +1,147 @@
+.tt-container {
+  max-width: 1000px;
+  margin: 80px auto 40px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 100px; /* Add enough space below fixed navbar */
+
+}
+
+.tt-container h1 {
+  font-size: 26px;
+  margin-bottom: 20px;
+  color: #333;
+  text-align: center;
+}
+
+.tt-task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.tt-task-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f4f4f4;
+  padding: 12px 15px;
+  margin: 10px 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+}
+
+.tt-col {
+  flex: 1;
+  min-width: 120px;
+}
+
+.tt-link {
+  text-decoration: none;
+  color: #007bff;
+}
+
+.tt-link:hover {
+  text-decoration: underline;
+}
+
+.tt-desc {
+  display: inline-block;
+  max-width: 220px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tt-priority {
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 14px;
+  text-transform: capitalize;
+}
+
+.tt-priority.high {
+  background: #f8d7da;
+  color: #c82333;
+}
+
+.tt-priority.medium {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.tt-priority.low {
+  background: #d4edda;
+  color: #155724;
+}
+
+.tt-status-dropdown,
+.tt-delete-btn {
+  font-size: 14px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.tt-readonly-status {
+  padding: 6px 10px;
+  background: #e0e0e0;
+  border-radius: 4px;
+}
+
+.tt-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.tt-filter-bar select,
+.tt-filter-bar button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.tt-clear-btn {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.tt-back-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 15px;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .tt-task-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tt-col {
+    width: 100%;
+  }
+
+  .tt-desc {
+    max-width: 100%;
+  }
+
+  .tt-status-dropdown,
+  .tt-delete-btn {
+    width: 100%;
+  }
+}

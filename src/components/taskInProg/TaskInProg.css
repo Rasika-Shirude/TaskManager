@@ -1,0 +1,57 @@
+.inprog-container {
+  max-width: 1000px;
+  margin: 80px auto 40px;
+  padding: 20px;
+    margin-top: 100px;
+}
+
+.inprog-title {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.inprog-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.inprog-filter-bar select,
+.inprog-filter-bar button {
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.clear-btn {
+  background-color: #ff6666;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.inprog-task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.inprog-task-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: #f4f4f4;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.inprog-task-column {
+  flex: 1;
+  min-width: 120px;
+}
