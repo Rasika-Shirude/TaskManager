@@ -2,7 +2,7 @@
   "name": "task-management-frontend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://rasika-shirude.github.io/task-manager",
+  "homepage": "https://Rasika-Shirude.github.io/task-manager",
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
