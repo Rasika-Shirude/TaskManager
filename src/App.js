@@ -12,12 +12,13 @@ import Register from "./components/register/Register";
 import PrivateRoute from "./components/login/PrivateRoute";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from './components/ScrollToTop'; // path may vary
 import TaskDetails from './components/totalTask/TaskDetails';
 
 function App() {
   const [searchQuery, setSearchQuery] = useState("");
 
+  // ✅ Load from localStorage or initialize default
   const [tasks, setTasks] = useState(() => {
     const saved = localStorage.getItem("tasks");
     return saved
@@ -36,18 +37,20 @@ function App() {
         ];
   });
 
+  // ✅ Save to localStorage when tasks change
   useEffect(() => {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
   return (
-    <BrowserRouter basename="/TaskManager">
+<BrowserRouter basename={process.env.NODE_ENV === "production" ? "/TaskManager" : "/"}>
       <ScrollToTop />
       <Navbar onSearch={setSearchQuery} />
-
-      <Routes>
+      
+      <Routes>  
         <Route path="/" element={<HomePage searchQuery={searchQuery} />} />
         <Route
+          exact
           path="/dashboard"
           element={
             <PrivateRoute>
@@ -55,14 +58,13 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/total-tasks" element={<TotalTasks tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
-        <Route path="/task-in-prog" element={<TaskInProg tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
-        <Route path="/completed" element={<Completed tasks={tasks} searchQuery={searchQuery} />} />
+       <Route path="/total-tasks" element={<TotalTasks tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
+       <Route path="/task-in-prog" element={<TaskInProg tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
+       <Route path="/completed" element={<Completed tasks={tasks} searchQuery={searchQuery} />} />
         <Route path="/task/:id" element={<TaskDetails tasks={tasks} setTasks={setTasks} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
-
       <ToastContainer />
       <Footer />
     </BrowserRouter>
