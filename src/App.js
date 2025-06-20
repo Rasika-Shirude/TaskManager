@@ -43,7 +43,7 @@ function App() {
   }, [tasks]);
 
   return (
-<HashRouter>
+<BrowserRouter basename="/TaskManager">
       <ScrollToTop />
       <Navbar onSearch={setSearchQuery} />
       
@@ -67,7 +67,7 @@ function App() {
       </Routes>
       <ToastContainer />
       <Footer />
-    </HashRouter>
+          </BrowserRouter>
   );
 }
 
