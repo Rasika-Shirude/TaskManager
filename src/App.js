@@ -43,7 +43,7 @@ function App() {
   }, [tasks]);
 
   return (
-<BrowserRouter basename={process.env.NODE_ENV === "production" ? "/TaskManager" : "/"}>
+<BrowserRouter basename="/TaskManager">
       <ScrollToTop />
       <Navbar onSearch={setSearchQuery} />
       
