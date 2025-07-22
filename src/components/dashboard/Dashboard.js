@@ -52,9 +52,10 @@ const filteredTasks = tasks.filter(task =>
       <h1 className="dashboard-title">Task Manager Dashboard</h1>
 
       <div className="dashboard-cards">
+        
         <div className="unified-card" onClick={() => navigate("/total-tasks")}>
-          <h2>Total Tasks</h2>
-          <p>{totalTasks}</p>
+          <h2>Tasks In Progress</h2>
+          <p>{totalTasks.length}</p>
         </div>
         <div className="unified-card" onClick={() => navigate("/task-in-prog")}>
           <h2>Tasks In Progress</h2>
