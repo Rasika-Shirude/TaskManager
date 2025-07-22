@@ -56,7 +56,7 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/total-tasks" element={<TotalTasks tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
+        <Route path="/dashboard/total-tasks" element={<TotalTasks tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
         <Route path="/task-in-prog" element={<TaskInProg tasks={tasks} setTasks={setTasks} searchQuery={searchQuery} />} />
         <Route path="/completed" element={<Completed tasks={tasks} searchQuery={searchQuery} />} />
         <Route path="/task/:id" element={<TaskDetails tasks={tasks} setTasks={setTasks} />} />
