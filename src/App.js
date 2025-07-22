@@ -40,11 +40,9 @@ function App() {
     localStorage.setItem("tasks", JSON.stringify(tasks));
   }, [tasks]);
 
-  // Dynamically set basename for local vs GitHub Pages
-const isLocalhost = window.location.hostname === "localhost";
-
+  
   return (
-<BrowserRouter basename={isLocalhost ? "/" : "/TaskManager"}>
+  <BrowserRouter basename={process.env.PUBLIC_URL}>
       <ScrollToTop />
       <Navbar onSearch={setSearchQuery} />
 

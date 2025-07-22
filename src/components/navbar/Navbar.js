@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import tmLogo from "./tm.jpg";
 import "./Navbar.css";
 
@@ -34,13 +34,13 @@ const Navbar = ({ onSearch }) => {
   return (
     <nav className="navbar-wrapper">
       <div className="navbar-section">
-        <a href="/" className="brand-logo">
+        <Link to="/" className="brand-logo">
           <img src={tmLogo} alt="Logo" />
           <span className="brand-text">JIRA</span>
-        </a>
-        <a href="/dashboard" onClick={handleDashboardClick} className="dashboard-link">
+        </Link>
+        <Link to="/dashboard" onClick={handleDashboardClick} className="dashboard-link">
           Dashboard
-        </a>
+        </Link>
       </div>
 
       <div className="navbar-actions">
@@ -59,7 +59,7 @@ const Navbar = ({ onSearch }) => {
         {isAuthenticated ? (
           <button className="btn logout-btn" onClick={handleLogout}>Logout</button>
         ) : (
-          <a className="btn login-btn" href="/login">Login</a>
+          <Link className="btn login-btn" to="/login">Login</Link>
         )}
       </div>
     </nav>

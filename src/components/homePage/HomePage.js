@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './HomePage.css';
 
 const HomePage = ({ searchQuery }) => {
@@ -23,12 +23,12 @@ const HomePage = ({ searchQuery }) => {
             collaboratively.
           </p>
           <div className="cta-buttons">
-            <a href="/login" className="btn primary">
+            <Link to="/login" className="btn primary">
               Login
-            </a>
-            <a href="/register" className="btn secondary">
+            </Link>
+            <Link to="/register" className="btn secondary">
               Sign Up
-            </a>
+            </Link>
           </div>
         </div>
       </section>
