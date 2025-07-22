@@ -36,7 +36,7 @@ const Navbar = ({ onSearch }) => {
       <div className="navbar-section">
         <Link to="/" className="brand-logo">
           <img src={tmLogo} alt="Logo" />
-          <span className="brand-text">JIRA</span>
+          <span className="brand-text">Task Manager</span>
         </Link>
         <Link to="/dashboard" onClick={handleDashboardClick} className="dashboard-link">
           Dashboard

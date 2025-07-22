@@ -96,8 +96,11 @@ let filteredTasks = tasks.filter(task => {
             </div>
             <div className="tt-col">
               <em className="tt-desc">
-                {task.description.length > 40 ? `${task.description.slice(0, 40)}...` : task.description}
-              </em>
+  {task.description?.length > 40
+    ? `${task.description.slice(0, 40)}...`
+    : task.description || "No description"}
+</em>
+
             </div>
             <div className="tt-col">
               <span className={`tt-priority ${task.priority?.toLowerCase()}`}>
