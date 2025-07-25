@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { db } from "../../firebase";
+import { updateDoc, doc } from "firebase/firestore";
 import "./TaskDetails.css";
+import { toast } from "react-toastify";
 
-const TaskDetails = ({ tasks, setTasks }) => {
+const TaskDetails = ({ tasks }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-    const location = useLocation(); // ✅ always call hooks at the top!
+  const location = useLocation();
   const from = location.state?.from || "/dashboard";
-  const taskId = parseInt(id);
-  const task = tasks.find(t => t.id === taskId);
 
+  const task = tasks.find(t => t.id === id);
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const userRole = currentUser?.role;
 
@@ -20,18 +22,26 @@ const TaskDetails = ({ tasks, setTasks }) => {
 
   if (!task) return <p>Task not found.</p>;
 
-  const updateTaskField = (field, value) => {
-    const updatedTasks = tasks.map(t =>
-      t.id === taskId ? { ...t, [field]: value } : t
-    );
-    setTasks(updatedTasks);
+  const updateTaskField = async (field, value) => {
+    try {
+      await updateDoc(doc(db, "tasks", id), { [field]: value });
+      toast.success(`✅ ${field} updated!`);
+    } catch (error) {
+      toast.error("❌ Error updating task!");
+    }
   };
 
   const handleFileUpload = (e) => {
-    const uploadedFiles = Array.from(e.target.files);
-    const newFiles = [...files, ...uploadedFiles.map(f => f.name)];
-    setFiles(newFiles);
-    updateTaskField("files", newFiles);
+    const uploadedFiles = Array.from(e.target.files).map(f => f.name);
+    const updatedFiles = [...files, ...uploadedFiles];
+    setFiles(updatedFiles);
+    updateTaskField("files", updatedFiles);
+  };
+
+  const handleDeleteFile = (index) => {
+    const updatedFiles = files.filter((_, i) => i !== index);
+    setFiles(updatedFiles);
+    updateTaskField("files", updatedFiles);
   };
 
   const handleCompletionDateChange = (e) => {
@@ -52,14 +62,6 @@ const TaskDetails = ({ tasks, setTasks }) => {
     updateTaskField("comments", updatedComments);
     setComment("");
   };
-const handleDeleteFile = (index) => {
-  const updatedFiles = files.filter((_, i) => i !== index);
-  setFiles(updatedFiles);
-  updateTaskField("files", updatedFiles);
-};
-
-
-const handleBack = () => navigate(from);
 
   return (
     <div className="task-details-container">
@@ -74,38 +76,20 @@ const handleBack = () => navigate(from);
         {files.length === 0 ? (
           <p>No files uploaded</p>
         ) : (
-        <ul className="file-list">
-  {files.map((f, i) => (
-    <li key={i}>
-      <a
-        href={`/uploads/${f}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="file-link"
-      >
-        📎 {f}
-      </a>
-      {userRole !== "admin" && (
-        <button
-          className="delete-file-btn"
-          onClick={() => handleDeleteFile(i)}
-        >
-          ❌
-        </button>
-      )}
-    </li>
-  ))}
-</ul>
-
-
-
+          <ul className="file-list">
+            {files.map((f, i) => (
+              <li key={i}>
+                📎 {f}
+                {userRole !== "admin" && (
+                  <button className="delete-file-btn" onClick={() => handleDeleteFile(i)}>
+                    ❌
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
         )}
-        <input
-          type="file"
-          multiple
-          onChange={handleFileUpload}
-          disabled={userRole === "admin"}
-        />
+        <input type="file" multiple onChange={handleFileUpload} disabled={userRole === "admin"} />
       </div>
 
       <div className="completion-date">
@@ -125,7 +109,7 @@ const handleBack = () => navigate(from);
         <strong>Comments:</strong>
         <ul>
           {comments.map((c, index) => (
-            <li key={index}>{c.text}</li>
+            <li key={index}>{c.user}: {c.text}</li>
           ))}
         </ul>
         <textarea
@@ -136,7 +120,7 @@ const handleBack = () => navigate(from);
         <button onClick={handleAddComment}>Post Comment</button>
       </div>
 
-      <button onClick={handleBack} className="back-button">Back</button>
+      <button onClick={() => navigate(from)} className="back-button">Back</button>
     </div>
   );
 };

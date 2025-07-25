@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import "./AddTask.css";
 import { toast } from "react-toastify";
+import { db } from "../../firebase";
+import { addDoc, collection } from "firebase/firestore";
 
-const AddTask = ({ addTask, tasks }) => {
+const AddTask = ({ tasks, onTaskAdded }) => {
   const [taskName, setTaskName] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [taskStatus, setTaskStatus] = useState("In Progress");
@@ -14,39 +16,72 @@ const AddTask = ({ addTask, tasks }) => {
   // Get next task number like INC100, INC101...
   const getNextTaskNumber = () => {
     const taskNumbers = tasks
-      .map(task => task.taskNumber)
+      .map((task) => task.taskNumber)
       .filter(Boolean)
-      .map(num => parseInt(num.replace("INC", ""), 10));
+      .map((num) => parseInt(num.replace("INC", ""), 10));
 
     const maxNumber = taskNumbers.length > 0 ? Math.max(...taskNumbers) : 99;
     return `INC${maxNumber + 1}`;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newTask = {
-      id: Date.now(),
-      taskNumber: getNextTaskNumber(),
-      name: taskName,
-      description: taskDesc,
-      status: userRole === "user" ? "with assignee" : taskStatus,
-      priority
-    };
-    addTask(newTask);
-    toast.success("Task added successfully!");
-    setTaskName("");
-    setTaskDesc("");
-    setTaskStatus("In Progress");
-    setPriority("Medium");
+
+    try {
+      // Create new task object
+      const newTask = {
+        taskNumber: getNextTaskNumber(),
+        name: taskName,
+        description: taskDesc,
+        status: userRole === "user" ? "with assignee" : taskStatus,
+        priority,
+        comments: [],
+        files: [],
+        completionDate: "",
+      };
+
+      // Add to Firestore
+      await addDoc(collection(db, "tasks"), newTask);
+
+      // Success message
+      toast.success("🎉 Task added successfully!");
+
+      // Optional callback to parent (Dashboard)
+      if (onTaskAdded) onTaskAdded();
+
+      // Reset fields
+      setTaskName("");
+      setTaskDesc("");
+      setTaskStatus("In Progress");
+      setPriority("Medium");
+    } catch (error) {
+      console.error("Error adding task:", error);
+      toast.error("❌ Failed to add task!");
+    }
   };
 
   return (
     <form className="add-task-form" onSubmit={handleSubmit}>
-      <input type="text" placeholder="Enter task name" value={taskName} onChange={(e) => setTaskName(e.target.value)} required />
-      <input type="text" placeholder="Enter task description" value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)} required />
+      <input
+        type="text"
+        placeholder="Enter task name"
+        value={taskName}
+        onChange={(e) => setTaskName(e.target.value)}
+        required
+      />
+      <input
+        type="text"
+        placeholder="Enter task description"
+        value={taskDesc}
+        onChange={(e) => setTaskDesc(e.target.value)}
+        required
+      />
 
       {userRole === "admin" && (
-        <select value={taskStatus} onChange={(e) => setTaskStatus(e.target.value)}>
+        <select
+          value={taskStatus}
+          onChange={(e) => setTaskStatus(e.target.value)}
+        >
           <option value="with assignee">With Assignee</option>
           <option value="In Progress">In Progress</option>
           <option value="under review">Under Review</option>
@@ -55,7 +90,11 @@ const AddTask = ({ addTask, tasks }) => {
         </select>
       )}
 
-      <select value={priority} onChange={(e) => setPriority(e.target.value)} required>
+      <select
+        value={priority}
+        onChange={(e) => setPriority(e.target.value)}
+        required
+      >
         <option value="High">High Priority</option>
         <option value="Medium">Medium Priority</option>
         <option value="Low">Low Priority</option>

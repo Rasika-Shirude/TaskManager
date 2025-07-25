@@ -1,44 +1,44 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
 import "./Login.css";
-import { toast } from 'react-toastify';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  // ✅ Mock users (fallback if not registered)
-  const mockUsers = [
-    { email: "user1@example.com", password: "user123", role: "user" },
-    { email: "assignee1@example.com", password: "assignee123", role: "assignee" },
-    { email: "admin@example.com", password: "admin123", role: "admin" },
-    { email: "rasika.shirude@gmail.com", password: "test123", role: "assignee" },
-  ];
-
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    const savedUsers = JSON.parse(localStorage.getItem("users")) || [];
-
-    const matchedUser = savedUsers.find(
-      (u) => u.email === email && u.password === password
-    ) || mockUsers.find(
-      (u) => u.email === email && u.password === password
-    );
-
-    if (matchedUser) {
-      localStorage.setItem("user", JSON.stringify(matchedUser));
-      toast.success("Login successful!");
-      navigate("/");
-    } else {
-      toast.error("Invalid credentials!");
+      // Fetch user role from Firestore
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        localStorage.setItem("user", JSON.stringify({ email: user.email, role: userData.role }));
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      } else {
+        toast.error("No role assigned. Please contact admin.");
+        console.warn("No user role found in Firestore for UID:", user.uid);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+      toast.error("Login failed: " + err.message);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box">
+    <div className="login-page">
+      <div className="login-container">
         <h2>Login</h2>
         <form onSubmit={handleLogin}>
           <input
@@ -55,9 +55,12 @@ const Login = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="btn">Login</button>
+          {error && <p className="error">{error}</p>}
+          <button type="submit">Login</button>
         </form>
-        <p>Don't have an account? <a href="/register">Register</a></p>
+        <p>
+          Don’t have an account? <Link to="/register">Register</Link>
+        </p>
       </div>
     </div>
   );

@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { db } from "../../firebase";
+import { updateDoc, doc } from "firebase/firestore";
+import { toast } from "react-toastify";
 import './TaskInProg.css';
 
-const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
+const TaskInProg = ({ tasks, searchQuery }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentUser = JSON.parse(localStorage.getItem("user"));
@@ -13,7 +16,6 @@ const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
   const [sortOrder, setSortOrder] = useState("none");
 
   const inProgressStatuses = ["In Progress", "under review", "ready to deploy"];
-
   let filteredTasks = tasks.filter(task =>
     inProgressStatuses.includes(task.status) &&
     task.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -22,11 +24,9 @@ const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
   if (priorityFilter !== "All") {
     filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
   }
-
   if (statusFilter !== "All") {
     filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
   }
-
   if (sortOrder !== "none") {
     const order = { "high": 1, "medium": 2, "low": 3 };
     filteredTasks.sort((a, b) => {
@@ -36,24 +36,18 @@ const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
     });
   }
 
-  const handleStatusChange = (taskId, newStatus) => {
-    const updatedTasks = tasks.map(task =>
-      task.id === taskId ? { ...task, status: newStatus } : task
-    );
-    setTasks(updatedTasks);
-  };
-
-  const handleClearFilters = () => {
-    setPriorityFilter("All");
-    setStatusFilter("All");
-    setSortOrder("none");
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
+      toast.success("✅ Status updated!");
+    } catch (error) {
+      toast.error("❌ Failed to update status!");
+    }
   };
 
   return (
     <div className="inprog-container">
       <h1 className="inprog-title">Tasks In Progress</h1>
-
-      {/* ✅ Filter Bar */}
       <div className="inprog-filter-bar">
         <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
           <option value="All">All Priorities</option>
@@ -61,19 +55,15 @@ const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
           <option value="Medium">Medium</option>
           <option value="Low">Low</option>
         </select>
-
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="All">All Statuses</option>
           {inProgressStatuses.map(status => (
             <option key={status} value={status}>{status}</option>
           ))}
         </select>
-
         <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
           Sort by Priority {sortOrder === "asc" ? "🔼" : "🔽"}
         </button>
-
-        <button onClick={handleClearFilters} className="clear-btn">Clear Filters</button>
       </div>
 
       <ul className="inprog-task-list">
@@ -88,11 +78,9 @@ const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
                 <strong>{task.name}</strong>
               </Link>
             </div>
-
             <div className="inprog-task-column">
               <span className={`priority-tag ${task.priority?.toLowerCase()}`}>{task.priority}</span>
             </div>
-
             <div className="inprog-task-column">
               {(userRole === "assignee" || userRole === "admin") ? (
                 <select
@@ -111,7 +99,6 @@ const TaskInProg = ({ tasks, setTasks, searchQuery }) => {
           </li>
         ))}
       </ul>
-
       <button onClick={() => navigate('/dashboard')} className="back-button">Back</button>
     </div>
   );

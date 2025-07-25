@@ -1,33 +1,44 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../firebase";
+import { useNavigate, Link } from "react-router-dom";
+import { toast } from "react-toastify";
+import "./Register.css";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
-  const navigate = useNavigate();
+  const [error, setError] = useState("");
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+    try {
+      // Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
+      // Save role in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        role
+      });
 
-    const emailExists = users.some(u => u.email === email);
-    if (emailExists) {
-      alert("Email already registered.");
-      return;
+      toast.success("Registration successful!");
+      localStorage.setItem("user", JSON.stringify({ email: user.email, role }));
+      navigate("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+      toast.error("Registration failed: " + err.message);
     }
-
-    const newUser = { email, password, role };
-    localStorage.setItem("users", JSON.stringify([...users, newUser]));
-
-    alert("Registration successful! Please log in.");
-    navigate("/login");
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-box">
+    <div className="register-page">
+      <div className="register-container">
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
           <input
@@ -49,9 +60,12 @@ const Register = () => {
             <option value="assignee">Assignee</option>
             <option value="admin">Admin</option>
           </select>
-          <button type="submit" className="btn">Register</button>
+          {error && <p className="error">{error}</p>}
+          <button type="submit">Register</button>
         </form>
-        <p>Already have an account? <a href="/login">Login</a></p>
+        <p>
+          Already have an account? <Link to="/login">Login</Link>
+        </p>
       </div>
     </div>
   );
