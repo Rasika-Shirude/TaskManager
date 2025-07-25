@@ -2,11 +2,8 @@ import React, { useState } from "react";
 import "./TotalTasks.css";
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import AddTask from './AddTask';
-import { db } from "../../firebase";
-import { updateDoc, deleteDoc, doc } from "firebase/firestore";
-import { toast } from "react-toastify";
 
-const TotalTasks = ({ tasks, searchQuery }) => {
+const TotalTasks = ({ tasks, setTasks, searchQuery }) => {
   const navigate = useNavigate();
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const userRole = currentUser?.role;
@@ -14,31 +11,28 @@ const TotalTasks = ({ tasks, searchQuery }) => {
 
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [sortOrder, setSortOrder] = useState("none");
+  const [sortOrder, setSortOrder] = useState("asc");
 
   const handleBack = () => navigate('/dashboard');
 
-  // Delete task from Firestore
-  const handleDelete = async (id) => {
-    try {
-      await deleteDoc(doc(db, "tasks", id));
-      toast.success("🗑️ Task deleted!");
-    } catch (error) {
-      toast.error("❌ Error deleting task!");
-    }
+  const handleDelete = (id) => setTasks(tasks.filter(task => task.id !== id));
+
+  const handleStatusChange = (taskId, newStatus) => {
+    const updated = tasks.map((task) =>
+      task.id === taskId ? { ...task, status: newStatus } : task
+    );
+    setTasks(updated);
   };
 
-  // Update task status in Firestore
-  const handleStatusChange = async (taskId, newStatus) => {
-    try {
-      await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
-      toast.success("✅ Status updated!");
-    } catch (error) {
-      toast.error("❌ Error updating status!");
-    }
+  const addTask = (newTask) => setTasks([...tasks, newTask]);
+
+  const handleClearFilters = () => {
+    setPriorityFilter("All");
+    setStatusFilter("All");
+    setSortOrder("asc");
   };
 
-  // Search & filter tasks
+  // 🔹 Filter tasks by search, priority, status
   let filteredTasks = tasks.filter(task => {
     const taskNum = task.taskNumber?.toLowerCase() || "";
     const taskName = task.name?.toLowerCase() || "";
@@ -48,22 +42,23 @@ const TotalTasks = ({ tasks, searchQuery }) => {
   if (priorityFilter !== "All") {
     filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
   }
+
   if (statusFilter !== "All") {
     filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
   }
-  if (sortOrder !== "none") {
-    const priorityValue = (p) => ({ high: 1, medium: 2, low: 3 }[p?.toLowerCase()] || 4);
-    filteredTasks.sort((a, b) => {
-      const valA = priorityValue(a.priority);
-      const valB = priorityValue(b.priority);
-      return sortOrder === "asc" ? valA - valB : valB - valA;
-    });
-  }
+
+  // 🔹 Sort by INC number (increasing order)
+  filteredTasks.sort((a, b) => {
+    const numA = parseInt(a.taskNumber?.replace("INC", "") || 0, 10);
+    const numB = parseInt(b.taskNumber?.replace("INC", "") || 0, 10);
+    return numA - numB;
+  });
 
   return (
     <div className="tt-container">
       <h1>Total Tasks</h1>
-      {(userRole === "user" || userRole === "admin") && <AddTask tasks={tasks} />}
+
+      {(userRole === "user" || userRole === "admin") && <AddTask addTask={addTask} tasks={tasks} />}
 
       <div className="tt-filter-bar">
         <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
@@ -72,6 +67,7 @@ const TotalTasks = ({ tasks, searchQuery }) => {
           <option value="Medium">Medium</option>
           <option value="Low">Low</option>
         </select>
+
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
           <option value="All">All Statuses</option>
           <option value="with assignee">With Assignee</option>
@@ -80,9 +76,12 @@ const TotalTasks = ({ tasks, searchQuery }) => {
           <option value="ready to deploy">Ready to Deploy</option>
           <option value="Completed">Completed</option>
         </select>
+
         <button onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}>
           Sort by Priority {sortOrder === "asc" ? "🔼" : "🔽"}
         </button>
+
+        <button onClick={handleClearFilters} className="tt-clear-btn">Clear Filters</button>
       </div>
 
       <ul className="tt-task-list">
@@ -92,13 +91,9 @@ const TotalTasks = ({ tasks, searchQuery }) => {
               <Link to={`/task/${task.id}`} state={{ from: location.pathname }} className="tt-link">
                 <strong>{task.taskNumber}: {task.name}</strong>
               </Link>
-            </div>
-            <div className="tt-col">
-              <em className="tt-desc">
-                {task.description?.length > 40
-                  ? `${task.description.slice(0, 40)}...`
-                  : task.description || "No description"}
-              </em>
+              <div className="tt-desc">
+                {task.description?.length > 40 ? `${task.description.slice(0, 40)}...` : task.description || "No description"}
+              </div>
             </div>
             <div className="tt-col">
               <span className={`tt-priority ${task.priority?.toLowerCase()}`}>
@@ -132,6 +127,7 @@ const TotalTasks = ({ tasks, searchQuery }) => {
           </li>
         ))}
       </ul>
+
       <button className="tt-back-btn" onClick={handleBack}>Back</button>
     </div>
   );
