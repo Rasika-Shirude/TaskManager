@@ -1,34 +1,90 @@
-import React from "react";
-import { useNavigate, Link, useLocation } from 'react-router-dom';
-import './Completed.css';
+import React, { useState } from "react";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import "./Completed.css";
 
 const Completed = ({ tasks, searchQuery }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleBack = () => navigate('/dashboard');
+  const [priorityFilter, setPriorityFilter] = useState("All");
+  const [sortOrder, setSortOrder] = useState("none");
 
-  // Filter completed tasks
-  const completedTasks = tasks.filter(task => task.status === "Completed");
-  let filteredTasks = completedTasks.filter(task =>
-    task.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filter only completed tasks
+  let filteredTasks = tasks.filter((task) => task.status === "Completed");
 
-  // 🔹 Sort by INC number
-  filteredTasks.sort((a, b) => {
-    const numA = parseInt(a.taskNumber?.replace("INC", "") || 0, 10);
-    const numB = parseInt(b.taskNumber?.replace("INC", "") || 0, 10);
-    return numA - numB;
+  // Search filter
+  filteredTasks = filteredTasks.filter((task) => {
+    const taskNum = task.taskNumber?.toLowerCase() || "";
+    const taskName = task.name?.toLowerCase() || "";
+    return (
+      taskNum.includes(searchQuery.toLowerCase()) ||
+      taskName.includes(searchQuery.toLowerCase())
+    );
   });
+
+  // Priority filter
+  if (priorityFilter !== "All") {
+    filteredTasks = filteredTasks.filter(
+      (task) => task.priority === priorityFilter
+    );
+  }
+
+  // Sorting
+  if (sortOrder !== "none") {
+    const priorityValue = (p) =>
+      ({ High: 1, Medium: 2, Low: 3 }[p] || 4);
+    filteredTasks.sort((a, b) => {
+      const valA = priorityValue(a.priority);
+      const valB = priorityValue(b.priority);
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    });
+  } else {
+    // Default sort by INC number
+    filteredTasks.sort((a, b) => {
+      const numA = parseInt(a.taskNumber?.replace("INC", ""), 10);
+      const numB = parseInt(b.taskNumber?.replace("INC", ""), 10);
+      return numA - numB;
+    });
+  }
 
   return (
     <div className="total-tasks-container">
       <h1>Completed Tasks</h1>
+
+      {/* Filters */}
+      <div className="filter-bar">
+        <select
+          value={priorityFilter}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+        >
+          <option value="All">All Priorities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+
+        <button
+          onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+        >
+          Sort by Priority {sortOrder === "asc" ? "🔼" : "🔽"}
+        </button>
+
+        <button
+          onClick={() => {
+            setPriorityFilter("All");
+            setSortOrder("none");
+          }}
+          className="clear-btn"
+        >
+          Clear Filters
+        </button>
+      </div>
+
       {filteredTasks.length === 0 ? (
         <p>No completed tasks found.</p>
       ) : (
         <ul className="task-list">
-          {filteredTasks.map(task => (
+          {filteredTasks.map((task) => (
             <li key={task.id} className="task-item">
               <div className="task-column">
                 <Link
@@ -37,20 +93,15 @@ const Completed = ({ tasks, searchQuery }) => {
                   className="task-link"
                 >
                   <strong>{task.taskNumber}: {task.name}</strong>
-                  <div className="task-desc">
-                    {task.description?.length > 40
-                      ? `${task.description.slice(0, 40)}...`
-                      : task.description || "No description"}
-                  </div>
                 </Link>
               </div>
-
               <div className="task-column">
-                <span className={`priority-tag ${task.priority?.toLowerCase()}`}>
+                <span
+                  className={`priority-tag ${task.priority?.toLowerCase()}`}
+                >
                   {task.priority}
                 </span>
               </div>
-
               <div className="task-column">
                 <span className="status-tag completed">{task.status}</span>
               </div>
@@ -58,7 +109,9 @@ const Completed = ({ tasks, searchQuery }) => {
           ))}
         </ul>
       )}
-      <button onClick={handleBack} className="back-button">Back</button>
+      <button onClick={() => navigate("/dashboard")} className="back-button">
+        Back
+      </button>
     </div>
   );
 };

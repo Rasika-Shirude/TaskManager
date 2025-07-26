@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import "./AddTask.css";
 import { toast } from "react-toastify";
+import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../firebase";
-import { addDoc, collection, getDocs } from "firebase/firestore";
 
 const AddTask = ({ tasks }) => {
   const [taskName, setTaskName] = useState("");
@@ -13,58 +13,37 @@ const AddTask = ({ tasks }) => {
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const userRole = currentUser?.role;
 
-  /**
-   * Generate the next INC number dynamically from Firestore
-   */
-  const getNextTaskNumber = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "tasks"));
-      const numbers = querySnapshot.docs
-        .map((doc) => doc.data().taskNumber)
-        .filter(Boolean)
-        .map((num) => parseInt(num.replace("INC", ""), 10));
+  // Get next task number INC###
+  const getNextTaskNumber = () => {
+    const taskNumbers = tasks
+      .map((task) => task.taskNumber)
+      .filter(Boolean)
+      .map((num) => parseInt(num.replace("INC", ""), 10));
 
-      const maxNum = numbers.length > 0 ? Math.max(...numbers) : 99;
-      return `INC${maxNum + 1}`;
-    } catch (err) {
-      console.error("Error generating task number:", err);
-      return `INC100`; // fallback
-    }
+    const maxNumber = taskNumbers.length > 0 ? Math.max(...taskNumbers) : 99;
+    return `INC${maxNumber + 1}`;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (!taskName || !taskDesc) {
-      toast.error("Please fill in all fields");
-      return;
-    }
+    const newTask = {
+      taskNumber: getNextTaskNumber(),
+      name: taskName,
+      description: taskDesc,
+      status: userRole === "user" ? "with assignee" : taskStatus,
+      priority,
+    };
 
     try {
-      const nextTaskNumber = await getNextTaskNumber();
-
-      const newTask = {
-        taskNumber: nextTaskNumber,
-        name: taskName,
-        description: taskDesc,
-        status: userRole === "user" ? "with assignee" : taskStatus,
-        priority,
-        createdAt: new Date(),
-      };
-
-      // Add to Firestore
       await addDoc(collection(db, "tasks"), newTask);
-
-      toast.success(`Task ${nextTaskNumber} added successfully!`);
-
-      // Reset fields
+      toast.success("Task added successfully!");
       setTaskName("");
       setTaskDesc("");
       setTaskStatus("In Progress");
       setPriority("Medium");
-    } catch (err) {
-      console.error("Error adding task:", err);
-      toast.error("Failed to add task. Try again!");
+    } catch (error) {
+      toast.error("Error adding task");
+      console.error(error);
     }
   };
 

@@ -2,63 +2,74 @@ import React, { useState } from "react";
 import "./TotalTasks.css";
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import AddTask from './AddTask';
+import { db } from "../../firebase";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 
-const TotalTasks = ({ tasks, setTasks, searchQuery }) => {
+const TotalTasks = ({ tasks, searchQuery }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const currentUser = JSON.parse(localStorage.getItem("user"));
   const userRole = currentUser?.role;
-  const location = useLocation();
 
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
-  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortOrder, setSortOrder] = useState("none");
 
   const handleBack = () => navigate('/dashboard');
 
-  const handleDelete = (id) => setTasks(tasks.filter(task => task.id !== id));
-
-  const handleStatusChange = (taskId, newStatus) => {
-    const updated = tasks.map((task) =>
-      task.id === taskId ? { ...task, status: newStatus } : task
-    );
-    setTasks(updated);
+  // Delete Task
+  const handleDelete = async (id) => {
+    await deleteDoc(doc(db, "tasks", id));
   };
 
-  const addTask = (newTask) => setTasks([...tasks, newTask]);
-
-  const handleClearFilters = () => {
-    setPriorityFilter("All");
-    setStatusFilter("All");
-    setSortOrder("asc");
+  // Update Status
+  const handleStatusChange = async (taskId, newStatus) => {
+    await updateDoc(doc(db, "tasks", taskId), { status: newStatus });
   };
 
-  // 🔹 Filter tasks by search, priority, status
-  let filteredTasks = tasks.filter(task => {
+  // Filtering logic
+  let filteredTasks = tasks.filter((task) => {
     const taskNum = task.taskNumber?.toLowerCase() || "";
     const taskName = task.name?.toLowerCase() || "";
-    return taskNum.includes(searchQuery.toLowerCase()) || taskName.includes(searchQuery.toLowerCase());
+    return (
+      taskNum.includes(searchQuery.toLowerCase()) ||
+      taskName.includes(searchQuery.toLowerCase())
+    );
   });
 
   if (priorityFilter !== "All") {
-    filteredTasks = filteredTasks.filter(task => task.priority === priorityFilter);
+    filteredTasks = filteredTasks.filter((task) => task.priority === priorityFilter);
   }
 
   if (statusFilter !== "All") {
-    filteredTasks = filteredTasks.filter(task => task.status === statusFilter);
+    filteredTasks = filteredTasks.filter((task) => task.status === statusFilter);
   }
 
-  // 🔹 Sort by INC number (increasing order)
-  filteredTasks.sort((a, b) => {
-    const numA = parseInt(a.taskNumber?.replace("INC", "") || 0, 10);
-    const numB = parseInt(b.taskNumber?.replace("INC", "") || 0, 10);
-    return numA - numB;
-  });
+  // Sorting by priority
+  if (sortOrder !== "none") {
+    const priorityValue = (p) =>
+      ({ High: 1, Medium: 2, Low: 3 }[p] || 4);
+    filteredTasks.sort((a, b) => {
+      const valA = priorityValue(a.priority);
+      const valB = priorityValue(b.priority);
+      return sortOrder === "asc" ? valA - valB : valB - valA;
+    });
+  } else {
+    // Default sort by task number ascending
+    filteredTasks.sort((a, b) => {
+      const numA = parseInt(a.taskNumber?.replace("INC", ""), 10);
+      const numB = parseInt(b.taskNumber?.replace("INC", ""), 10);
+      return numA - numB;
+    });
+  }
 
   return (
     <div className="tt-container">
       <h1>Total Tasks</h1>
 
-      {(userRole === "user" || userRole === "admin") && <AddTask addTask={addTask} tasks={tasks} />}
+      {(userRole === "user" || userRole === "admin") && (
+        <AddTask tasks={tasks} />
+      )}
 
       <div className="tt-filter-bar">
         <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)}>
@@ -81,7 +92,13 @@ const TotalTasks = ({ tasks, setTasks, searchQuery }) => {
           Sort by Priority {sortOrder === "asc" ? "🔼" : "🔽"}
         </button>
 
-        <button onClick={handleClearFilters} className="tt-clear-btn">Clear Filters</button>
+        <button onClick={() => {
+          setPriorityFilter("All");
+          setStatusFilter("All");
+          setSortOrder("none");
+        }} className="tt-clear-btn">
+          Clear Filters
+        </button>
       </div>
 
       <ul className="tt-task-list">
@@ -91,9 +108,13 @@ const TotalTasks = ({ tasks, setTasks, searchQuery }) => {
               <Link to={`/task/${task.id}`} state={{ from: location.pathname }} className="tt-link">
                 <strong>{task.taskNumber}: {task.name}</strong>
               </Link>
-              <div className="tt-desc">
-                {task.description?.length > 40 ? `${task.description.slice(0, 40)}...` : task.description || "No description"}
-              </div>
+            </div>
+            <div className="tt-col">
+              <em className="tt-desc">
+                {task.description?.length > 40
+                  ? `${task.description.slice(0, 40)}...`
+                  : task.description || "No description"}
+              </em>
             </div>
             <div className="tt-col">
               <span className={`tt-priority ${task.priority?.toLowerCase()}`}>

@@ -11,7 +11,7 @@ import Login from "./components/login/Login";
 import Register from "./components/register/Register";
 import Footer from "./components/footer/Footer";
 import PrivateRoute from "./components/login/PrivateRoute";
-import ScrollToTop from './components/ScrollToTop';
+import ScrollToTop from "./components/ScrollToTop";
 import { ToastContainer } from "react-toastify";
 import { collection, onSnapshot } from "firebase/firestore";
 import { db, auth } from "./firebase";
@@ -34,15 +34,15 @@ function App() {
   useEffect(() => {
     if (user) {
       const unsub = onSnapshot(collection(db, "tasks"), (snapshot) => {
-        const fetchedTasks = snapshot.docs.map(doc => ({
+        const fetchedTasks = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
         setTasks(fetchedTasks);
       });
       return () => unsub();
     } else {
-      setTasks([]); // Clear tasks on logout
+      setTasks([]);
     }
   }, [user]);
 
